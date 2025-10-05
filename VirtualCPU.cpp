@@ -109,6 +109,24 @@ public:
             std::cout << Registers[Byte].Reg << std::endl;
             break;
         }
+        case 0x05: // CMP compare two registers and sets flag
+        {
+            uint8_t Dest = Fetch();
+            uint8_t Source = Fetch();
+            std::cout << "  CMP: R" << (int)Dest << "(" << (int)Registers[Dest].Reg
+                << ") vs R" << (int)Source << "(" << (int)Registers[Source].Reg << ")" << std::endl;
+
+            if (Registers[Dest].Reg == Registers[Source].Reg)
+            {
+                flags = flags | 0b00000001;
+            }
+            else
+            {
+                flags = flags & 0b11111110;
+            }
+            break;
+        }
+
         }
     }
 
@@ -212,12 +230,21 @@ int main()
 {
     CPU CPU;
 
+    //uint8_t program[] = {
+    //    0x01, 0x00, 0x05,    // LOAD 5 into register 0
+    //    0x01, 0x01, 0x03,    // LOAD 3 into register 1  
+    //    0x02, 0x00, 0x01,    // ADD R0 + R1, store in R0
+    //    0x04, 0x00,          // PRINT R0
+    //    0x00                // HALT
+    //};
+
     uint8_t program[] = {
-        0x01, 0x00, 0x05,    // LOAD 5 into register 0
-        0x01, 0x01, 0x03,    // LOAD 3 into register 1  
-        0x02, 0x00, 0x01,    // ADD R0 + R1, store in R0
-        0x04, 0x00,          // PRINT R0
-        0x00                // HALT
+    0x01, 0x00, 0x05,    // LOAD 5 into R0
+    0x01, 0x01, 0x03,    // LOAD 3 into R1  
+    0x05, 0x00, 0x01,    // CMP R0 vs R1 (5 vs 3, not equal, flag=0)
+    0x01, 0x02, 0x05,    // LOAD 5 into R2
+    0x05, 0x00, 0x02,    // CMP R0 vs R2 (5 vs 5, equal, flag=1)
+    0x00                 // HALT
     };
 
     CPU.LoadProgram(program, 0x0000, sizeof(program));
