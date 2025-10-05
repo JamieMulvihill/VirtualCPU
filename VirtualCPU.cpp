@@ -53,24 +53,29 @@ public:
     {
         // reads byte at PC, increments PC
         uint8_t Byte = Memory.Addresses[PC];
+        std::cout << "Fetch: PC=" << PC << " Byte=0x" << std::hex << (int)Byte << std::endl;
         PC++;
         return Byte;
     }
 
     void Decode(uint8_t Opcode)
     {
+        std::cout << "Decode: Opcode=0x" << std::hex << (int)Opcode << std::endl;
+
         // figures out what instruction to run
         switch (Opcode)
         {
         case 0x00: // HALT top the CPU
         {
             bIsRunning = false;
+            std::cout << "  HALT: Stopping CPU" << std::endl;
             break;
         }
         case 0x01: // LOAD_IMM Load immediate value into register
         {
             uint8_t ByteA = Fetch();
             uint8_t ByteB = Fetch();
+            std::cout << "  LOAD_IMM: R" << (int)ByteA << " = " << (int)ByteB << std::endl;
             Registers[ByteA].Reg = ByteB;
             break;
         }
@@ -78,6 +83,10 @@ public:
         {
             uint8_t Dest1 = Fetch();
             uint8_t Source1 = Fetch();
+            std::cout << "  ADD: R" << (int)Dest1 << " = R" << (int)Dest1
+                << "(" << (int)Registers[Dest1].Reg << ")"
+                << " + R" << (int)Source1
+                << "(" << (int)Registers[Source1].Reg << ")" << std::endl;
             Registers[Dest1].Reg = Registers[Dest1].Reg + Registers[Source1].Reg;
             break;
         }
@@ -85,12 +94,18 @@ public:
         {
             uint8_t Dest2 = Fetch();
             uint8_t Source2 = Fetch();
+            std::cout << "  SUB: R" << (int)Dest2 << " = R" << (int)Dest2
+                << "(" << (int)Registers[Dest2].Reg << ")"
+                << " - R" << (int)Source2
+                << "(" << (int)Registers[Source2].Reg << ")" << std::endl;
             Registers[Dest2].Reg = Registers[Dest2].Reg - Registers[Source2].Reg;
             break;
         }
         case 0x04: // PRINT Print register value 
         {
             uint8_t Byte = Fetch();
+            std::cout << "  PRINT: R" << (int)Byte << " = " << (int)Registers[Byte].Reg << std::endl;
+            std::cout << "  Output: " << (int)Registers[Byte].Reg << std::endl;
             std::cout << Registers[Byte].Reg << std::endl;
             break;
         }
@@ -107,7 +122,6 @@ public:
         // does one fetch-decode-execute cycle
         uint8_t Byte = Fetch();
         Decode(Byte);
-        Execute(Byte);
     }
 
     void Run()
